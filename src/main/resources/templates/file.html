@@ -1,0 +1,15 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${name}"></title>
+</head>
+<body>
+    <img th:src="@{/images/file.svg}" alt="文件">
+    <p><b>文件名：</b>[[${name}]]</p>
+    <p><b>文件大小：</b>[[${size}]]</p>
+    <a th:href="@{/file/download(path=${url})}">下载</a>
+</body>
+</html>

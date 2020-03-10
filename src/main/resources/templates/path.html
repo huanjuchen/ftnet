@@ -1,0 +1,29 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${name}"></title>
+</head>
+<body>
+<div >
+    <p><img height="24px" width="24px" th:src="@{/images/home1.svg}" alt=""/>
+    <a th:href="@{/}">返回首页</a>
+    </p>
+    <p th:if="${parentPath}!=null">
+        <img height="24px" width="24px" th:src="@{/images/floder.svg}" alt=""/>
+        <a th:href="@{/path(abPath=${parentPath})}">..上一级目录</a>
+    </p>
+    <hr/>
+    <p th:each="floder:${subPaths}">
+        <img height="24px" width="24px" th:src="@{/images/floder.svg}" alt=""/>
+        <a th:href="@{/path(abPath=${floder.url})}" th:text="${floder.name}"></a>
+    </p>
+    <p th:each="file:${subFiles}">
+        <img height="24px" width="24px" th:src="@{/images/file.svg}" alt=""/>
+        <a th:href="@{/file(path=${file.url})}" th:text="${file.name}"></a>
+    </p>
+</div>
+</body>
+</html>

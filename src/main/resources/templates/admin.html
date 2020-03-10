@@ -1,0 +1,39 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <title>分享端</title>
+</head>
+<body>
+<div class="row">
+    <div class="col-md-4"></div>
+
+    <div class="col-md-4">
+        <div class="page-header">
+            <h1>管理端
+                <small>分享文件夹</small>
+            </h1>
+        </div>
+        <div class="alert alert-info" role="alert">在下方输入或粘贴文件夹路径</div>
+        <form class="form-inline" th:action="@{/admin/addPath}" method="post">
+            <div class="form-group">
+                <label for="pathStr">路径</label>
+                <input type="text" name="path" class="form-control" id="pathStr" placeholder="把路径粘贴到这里">
+            </div>
+            <button type="submit" class="btn btn-default">添加</button>
+        </form>
+        <hr>
+        <div th:each="path:${pathList}">
+            <div><b th:text="${path}"></b> <a th:href="@{/admin/removePath(key=${path})}">移除</a></div>
+        </div>
+
+    </div>
+    <div class="col-md-4"></div>
+
+</div>
+
+</body>
+</html>
