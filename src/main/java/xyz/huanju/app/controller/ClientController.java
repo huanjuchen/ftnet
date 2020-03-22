@@ -173,7 +173,6 @@ public class ClientController {
             }
             outputStream.flush();
         } catch (IOException e) {
-            System.out.println("----");
         } finally {
             if (inputStream != null) {
                 try {
@@ -186,7 +185,6 @@ public class ClientController {
                 try {
                     outputStream.close();
                 } catch (IOException e) {
-                    System.out.println("---");
                 }
             }
         }

@@ -1,8 +1,12 @@
 package xyz.huanju.app.storage;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.system.ApplicationHome;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 //import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +24,14 @@ public class SharePath {
     private volatile Map<String, String> shareMap;
 
     /**
+     * 文件名
+     */
+    private final String initFileName = "ftnet";
+
+    private final String charset="utf-8";
+
+
+    /**
      * 最大长度
      */
     private final int maxSize = 10;
@@ -28,7 +40,79 @@ public class SharePath {
 
     public SharePath() {
         shareMap = new HashMap<>();
+        init();
     }
+
+    private void init() {
+        String url = getInitFileUrl();
+        File file=new File(url);
+        if (!file.exists()||file.isDirectory()){
+            return;
+        }
+        List<String> initPath=getInitPath(url);
+        for (String path : initPath) {
+            File checkFile = new File(path);
+            if (checkFile.exists() && checkFile.isDirectory()) {
+                this.add(path);
+            }
+        }
+    }
+
+
+
+
+    private String getInitFileUrl() {
+        String path=System.getProperty("user.dir");
+        return path+"/"+initFileName;
+    }
+
+    private List<String> getInitPath(String url){
+        InputStream in=null;
+        InputStreamReader isr=null;
+        BufferedReader br = null;
+        List<String> list=new ArrayList<>();
+        try {
+            in=new FileInputStream(url);
+            isr=new InputStreamReader(in, Charset.forName(charset));
+            br=new BufferedReader(isr);
+            String str=null;
+            while ((str=br.readLine())!=null){
+                if (list.size()>=10){
+                    break;
+                }
+                list.add(str);
+            }
+        } catch (IOException e) {
+            System.out.println();
+        } finally {
+            if (in!=null){
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (isr!=null){
+                try {
+                    isr.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            //
+            if (br!=null){
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return list;
+    }
+
 
     /**
      * 添加
@@ -96,32 +180,13 @@ public class SharePath {
     }
 
 
-    private String getKey2(String path) {
-        if (path == null || path.length() == 0) {
-            return null;
-        }
-        String str = path;
-        int lastIndex = str.lastIndexOf('/');
-        int len = str.length();
-
-        if (lastIndex == len-1) {
-            str = str.substring(0, path.length() - 1);
-        }
-        lastIndex = str.lastIndexOf('/');
-        if (lastIndex == -1) {
-            return str;
-        }
-        return str.substring(lastIndex + 1);
-    }
-
     private String getKey(String path) {
-        File file=new File(path);
-        if (!file.exists()){
+        File file = new File(path);
+        if (!file.exists()) {
             return null;
         }
         return file.getName();
     }
-
 
 
     private Map<String, String> getShareMap() {
