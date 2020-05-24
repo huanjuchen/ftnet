@@ -1,15 +1,11 @@
 package xyz.huanju.app.storage;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.system.ApplicationHome;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
-//import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author HuanJu

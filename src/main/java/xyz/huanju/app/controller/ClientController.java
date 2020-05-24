@@ -4,7 +4,10 @@ package xyz.huanju.app.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import xyz.huanju.app.domain.ApiResult;
 import xyz.huanju.app.domain.Path;
 import xyz.huanju.app.storage.SharePath;
 import xyz.huanju.app.utils.FileUtils;
@@ -17,7 +20,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -37,6 +43,57 @@ public class ClientController {
     public String toIndex(ModelMap map) {
         map.addAttribute("pathList", sharePath.keys());
         return "index";
+    }
+
+    @GetMapping("/indexData")
+    @ResponseBody
+    public ApiResult indexData() {
+        List<String> keys = sharePath.keys();
+//        try {
+//            TimeUnit.SECONDS.sleep(3L);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        return ApiResult.ok(keys);
+    }
+
+    @GetMapping("/path/json")
+    @ResponseBody
+    public ApiResult pathData(String key, String abPath) {
+        Map<String, Object> resultMap = new HashMap<>();
+        List<Path> subPaths = new ArrayList<>();
+        List<Path> subFiles = new ArrayList<>();
+        File file = null;
+        String parentName = null;
+        String parentPath = null;
+        String name = null;
+        if (abPath != null && abPath.length() > 0) {
+            file = new File(abPath);
+        } else if (key != null && key.length() > 0) {
+            String pathValue = sharePath.get(key);
+            if (pathValue != null && pathValue.length() > 0) {
+                file = new File(pathValue);
+            }
+        }
+
+        if (file != null) {
+            FileUtils.getSubPath(file, subPaths, subFiles);
+            name = file.getName();
+            File parentFile = file.getParentFile();
+            if (parentFile != null && parentFile.exists() && parentFile.canRead()) {
+                parentName = parentFile.getName();
+                parentPath = parentFile.getAbsolutePath();
+            }
+        }
+
+
+        if (parentPath != null) {
+            resultMap.put("parentPath", parentPath);
+        }
+        resultMap.put("subPaths", subFiles);
+        resultMap.put("subFiles", subFiles);
+        resultMap.put("name", name);
+        return ApiResult.ok(resultMap);
     }
 
 
@@ -97,6 +154,8 @@ public class ClientController {
         return "file";
     }
 
+    final static int BUFFER_SIZE = 16384;
+
     @RequestMapping("/file/download")
     public String downloadFile(String path, HttpServletRequest request, HttpServletResponse response, ModelMap map) {
         File file = new File(path);
@@ -116,15 +175,15 @@ public class ClientController {
         ServletOutputStream outputStream = null;
         String range = request.getHeader("Range");
         //MIME类型
-        String mimeType=request.getServletContext().getMimeType(path);
+        String mimeType = request.getServletContext().getMimeType(path);
         //文件长度
-        long fileLen=file.length();
+        long fileLen = file.length();
         //下载起始位置
         long startPos = 0;
-        long endPos=file.length()-1;
+        long endPos = file.length() - 1;
         //下载长度
-        long downloadSize=fileLen;
-        String filename=file.getName();
+        long downloadSize = fileLen;
+        String filename = file.getName();
         //断点续传请求处理
         if (range != null && range.length() > 0) {
             try {
@@ -142,8 +201,9 @@ public class ClientController {
         downloadSize = endPos - startPos + 1;
 
         try {
+
             //缓冲区大小
-            int bufferLen = (int) (downloadSize < 4096 ? downloadSize : 4096);
+            int bufferLen = (int) (downloadSize < BUFFER_SIZE ? downloadSize : BUFFER_SIZE);
             byte[] buffer = new byte[bufferLen];
             inputStream = new RandomAccessFile(file, "r");
             outputStream = response.getOutputStream();
