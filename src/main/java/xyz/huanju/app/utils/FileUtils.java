@@ -18,7 +18,7 @@ public class FileUtils {
 
     private final static String FIREFOX = "Firefox";
 
-    private final static String EXISTS_SUB="(1)";
+    private final static String EXISTS_SUB = "(1)";
 
     private final static Base64.Encoder encoder = Base64.getEncoder();
 
@@ -73,34 +73,44 @@ public class FileUtils {
     public static File createFile(String path, String name) {
         File file = new File(path + "/" + name);
         boolean result;
-        while (true){
-            if (!file.exists()){
-                try {
-                    result = file.createNewFile();
-                } catch (IOException e) {
-                    throw new UploadException(400,"创建文件失败");
-                }
 
-                if (!result){
-                    throw new UploadException(400,"创建文件失败");
-                }
-                return file;
+        if (!file.exists()) {
+            try {
+                result = file.createNewFile();
+            } catch (IOException e) {
+                throw new UploadException(400, "创建文件失败");
             }
+
+            if (!result) {
+                throw new UploadException(400, "创建文件失败");
+            }
+            return file;
+        }
             /*
             文件已存在
              */
-            String sub=name.substring(name.lastIndexOf('.'));
-
-            String newName=name.replace("."+sub,"");
-            newName=newName+EXISTS_SUB+"."+sub;
-
-            file=new File(path+"/"+newName);
+//        String sub = name.substring(name.lastIndexOf('.'));
+        String sub = null;
+        String newName = null;
+        int index = name.lastIndexOf('.');
+        if (index != -1) {
+            sub = name.substring(index);
+            newName = name.replace(sub, "");
+            newName = newName + EXISTS_SUB + sub;
+        } else {
+            /*
+            无后缀处理
+             */
+            newName = name + EXISTS_SUB;
         }
+
+
+        return createFile(path, newName);
     }
 
 
-    public static String getCacheUrl(String path,String name){
-        return path+"/"+name+"Cache";
+    public static String getCacheUrl(String path, String name) {
+        return path + "/" + name + "Cache";
     }
 
 
